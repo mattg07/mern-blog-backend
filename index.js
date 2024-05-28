@@ -19,7 +19,7 @@ const secret = process.env.SECRET_KEY;
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:5174/",
+    origin: "https://mern-blog-frontend-47cb.onrender.com",
   })
 );
 
