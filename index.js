@@ -51,6 +51,7 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const userDoc = await User.findOne({ username });
   const passOk = bcrypt.compareSync(password, userDoc.password);
+  
   if (passOk) {
     jwt.sign(
       { username, id: userDoc._id, isAdmin: userDoc.isAdmin },
@@ -58,9 +59,18 @@ app.post("/login", async (req, res) => {
       {},
       (err, token) => {
         if (err) throw err;
-        const expirationDate = new Date(Date.now() + 3600000);
+        
+        // Set cookie configuration
+        const cookieOptions = {
+          httpOnly: true, // Prevent client-side access
+          secure: true, // Send only over HTTPS
+          sameSite: 'None', // Allow cross-site requests
+          // Optionally set an expiration date
+          expires: new Date(Date.now() + 3600000), // 1 hour from now
+        };
 
-        res.cookie("token", token, {}).json({
+        // Set the token cookie
+        res.cookie("token", token, cookieOptions).json({
           id: userDoc._id,
           username,
           isAdmin: userDoc.isAdmin,
@@ -72,6 +82,7 @@ app.post("/login", async (req, res) => {
     res.status(400).json("Wrong credentials");
   }
 });
+
 
 app.get("/profile", async (req, res) => {
   const token = req.cookies.token;
